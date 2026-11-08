@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import sys
 import tempfile
 import unittest
 from io import BytesIO
@@ -10,8 +11,12 @@ import numpy as np
 from fastapi.responses import JSONResponse
 from PIL import Image
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import app as backend
-from motion_recognition import FEATURE_COUNT, SEQUENCE_LENGTH
+from src.motion_recognition import FEATURE_COUNT, SEQUENCE_LENGTH
 
 
 def make_test_frame():

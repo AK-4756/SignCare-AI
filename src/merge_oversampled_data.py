@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 PERSONAL_DATA_PATH = BASE_DIR / "Data" / "alphabet_data.csv"
 KAGGLE_DATA_PATH = BASE_DIR / "kaggle_augmented_data.csv"
 OUTPUT_PATH = BASE_DIR / "combined_training_data_oversampled.csv"

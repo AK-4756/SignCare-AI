@@ -25,7 +25,7 @@ import uuid
 
 from io import BytesIO
 from PIL import Image, ImageOps
-from motion_recognition import (
+from src.motion_recognition import (
     FEATURE_COUNT,
     MIN_SAMPLES_PER_LABEL,
     MOTION_LABELS,
@@ -208,7 +208,7 @@ class SignLanguagePredictor:
 
         if not os.path.exists(MODEL_PATH):
             logger.error(f"❌ Model not found at {MODEL_PATH}")
-            logger.error("Please run train_model.py first.")
+            logger.error("Please run src/train_model.py first.")
             raise FileNotFoundError(
                 f"Model file not found: {MODEL_PATH}"
             )
@@ -833,7 +833,7 @@ WORDS = list(MULTILINGUAL_WORDS.keys())
 @app.get("/")
 async def root():
     return FileResponse(
-        os.path.join(BASE_DIR, "signcare-ai.html")
+        os.path.join(BASE_DIR, "templates", "signcare-ai.html")
     )
 
 

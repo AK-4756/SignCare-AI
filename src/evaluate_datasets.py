@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score, classification_report, f1_score
 from sklearn.model_selection import StratifiedGroupKFold
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 OWN_DATA_PATH = BASE_DIR / "Data" / "alphabet_data.csv"
 KAGGLE_DATA_DIR = BASE_DIR / "archive (10)" / "landmarks"
 OWN_MODEL_PATH = BASE_DIR / "model" / "sign_language_model.p"

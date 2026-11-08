@@ -14,7 +14,7 @@ from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import StratifiedGroupKFold
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 PERSONAL_PATH = ROOT / "Data" / "alphabet_data.csv"
 KAGGLE_PATH = ROOT / "kaggle_augmented_data.csv"
 KAGGLE_IMAGES_PATH = (

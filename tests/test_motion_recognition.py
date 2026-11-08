@@ -1,10 +1,15 @@
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 import numpy as np
 
-from motion_recognition import (
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.motion_recognition import (
     FEATURE_COUNT,
     MAX_MISSING_MOTION_GAP,
     MIN_VALID_MOTION_FRAMES,

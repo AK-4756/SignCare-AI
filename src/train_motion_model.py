@@ -1,11 +1,17 @@
 """Train the webcam motion classifier for ASL J, Z, and OTHER gestures."""
 
 import os
+import sys
+from pathlib import Path
 
-from motion_recognition import train_motion_model
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.motion_recognition import train_motion_model
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = str(PROJECT_ROOT)
 DATA_DIR = os.path.join(BASE_DIR, "Data", "motion_sequences")
 MODEL_PATH = os.path.join(BASE_DIR, "model", "motion_sequence_model.p")
 

@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_PATH = BASE_DIR / "combined_training_data_oversampled.csv"
 MODEL_PATH = BASE_DIR / "model" / "sign_language_model_combined.p"
 FEATURE_COUNT = 63

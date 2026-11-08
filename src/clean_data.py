@@ -1,7 +1,11 @@
 import pandas as pd
 import os
 
-csv_path = os.path.join('Data', 'alphabet_data.csv')
+csv_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "Data",
+    "alphabet_data.csv",
+)
 
 if os.path.exists(csv_path):
     # 1. Load the data

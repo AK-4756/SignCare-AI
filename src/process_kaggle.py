@@ -12,7 +12,7 @@ import mediapipe as mp
 import numpy as np
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 INPUT_DIR = (
     BASE_DIR
     / "archive (11)"

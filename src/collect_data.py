@@ -54,7 +54,10 @@ if not hand_tracking_enabled:
     )
 
 
-DATA_DIR = "Data"
+DATA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "Data",
+)
 CSV_PATH = os.path.join(DATA_DIR, "alphabet_data.csv")
 MAX_SAMPLES = 600
 

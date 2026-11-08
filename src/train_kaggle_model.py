@@ -1,12 +1,18 @@
 """Train the live static-letter classifier from the Kaggle landmark dataset."""
 
 import pickle
+import sys
 from pathlib import Path
 
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-from evaluate_datasets import (
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.evaluate_datasets import (
     BASE_DIR,
     KAGGLE_DATA_DIR,
     SPLIT_SEED,
