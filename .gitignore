@@ -1,0 +1,20 @@
+# Virtual Environments
+venv/
+.venv/
+.venv-run/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# IDE Settings
+.vscode/
+
+# Datasets & Heavy Data
+archive (10)/
+archive (11)/
+Data/
+*.csv
+
+# Trained Models (Prevents large .pkl / .h5 files from blocking the push)
+model/

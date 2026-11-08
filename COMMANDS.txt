@@ -1,0 +1,230 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                   🤟 SignCare AI - COMMAND CHEAT SHEET                         ║
+║                        Copy & Paste These Commands                             ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 SETUP (Do This Once)
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Download files and save in your project folder
+
+2. Open Terminal in your project folder
+
+3. Install dependencies:
+   ────────────────────────────────────────────────────────────────────────────
+   pip install -r requirements.txt
+   ────────────────────────────────────────────────────────────────────────────
+   
+   Wait for "Successfully installed..." message
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🚀 RUN BACKEND (Terminal 1)
+═══════════════════════════════════════════════════════════════════════════════
+
+Make sure you're in your project folder, then:
+
+   ────────────────────────────────────────────────────────────────────────────
+   python app.py
+   ────────────────────────────────────────────────────────────────────────────
+
+Wait for:
+   ✅ SignLanguagePredictor initialized
+   🚀 Starting SignCare AI FastAPI Server
+   📍 Server running at: http://localhost:8000
+
+✅ KEEP THIS TERMINAL OPEN - Don't close it!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🌐 RUN FRONTEND (Terminal 2 - Open New Terminal!)
+═══════════════════════════════════════════════════════════════════════════════
+
+Open a SECOND terminal (keep first one open!), then:
+
+   ────────────────────────────────────────────────────────────────────────────
+   python -m http.server 8001
+   ────────────────────────────────────────────────────────────────────────────
+
+Wait for:
+   Serving HTTP on 0.0.0.0 port 8001
+
+✅ KEEP THIS TERMINAL OPEN TOO!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🌍 OPEN IN BROWSER
+═══════════════════════════════════════════════════════════════════════════════
+
+Now open these URLs in your browser:
+
+Backend API Test:
+   http://localhost:8000/docs
+
+SignCare AI Website:
+   http://localhost:8001/signcare-ai-backend.html
+
+✅ Check that API shows: "✅ API Connected" (GREEN, top right)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🎮 TEST IT
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Click "▶ Start Camera"
+2. Allow camera permission when asked
+3. Make a hand sign (letter A-Z)
+4. Watch the letter appear
+5. See confidence score
+6. Build words automatically
+7. Click "Add Space" to add word to sentence
+8. Click "🔊 Speak" to hear it
+9. Click "💾 Save" to save
+
+✅ If all this works, YOU'RE DONE!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🆘 IF SOMETHING BREAKS
+═══════════════════════════════════════════════════════════════════════════════
+
+API won't connect:
+   1. Check Terminal 1 is running "python app.py"
+   2. Check it shows "Server running at: http://localhost:8000"
+   3. Refresh browser (Ctrl+R or Cmd+R)
+
+Camera won't work:
+   1. Close browser completely
+   2. Reopen it
+   3. Go back to website
+   4. Click "Allow" for camera
+
+Port 8000 already in use:
+   # Windows
+   netstat -ano | findstr :8000
+   taskkill /PID [number] /F
+   python app.py
+   
+   # Mac/Linux
+   lsof -i :8000
+   kill -9 [PID]
+   python app.py
+
+No predictions:
+   1. Good lighting
+   2. Show hand clearly
+   3. Hold still for 1 second
+   4. Check API is connected (green)
+
+Model not found error:
+   python train.py
+
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 WHAT'S RUNNING
+═══════════════════════════════════════════════════════════════════════════════
+
+Terminal 1: Backend (Python FastAPI)
+   http://localhost:8000
+   Handles: Hand detection, ML predictions, word suggestions
+
+Terminal 2: Frontend Server (Python HTTP)
+   http://localhost:8001
+   Serves: Website files, handles camera input
+
+Your Browser:
+   http://localhost:8001/signcare-ai-backend.html
+   Shows: Live camera, predictions, suggestions, sentence building
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🔑 KEYBOARD SHORTCUTS
+═══════════════════════════════════════════════════════════════════════════════
+
+Press Number Keys:
+   1 - Select 1st suggestion
+   2 - Select 2nd suggestion
+   3 - Select 3rd suggestion
+
+Button Clicks:
+   ▶ Start Camera     - Begin detection
+   ⏹ Stop Camera      - Stop detection
+   ➜ Add Space        - Move word to sentence
+   🗑 Clear Word      - Delete current word
+   🔊 Speak           - Speak the sentence
+   💾 Save            - Save to history
+   Clear Sentence     - Clear everything
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 WORKFLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+Sign Letter → Letter Detected → Added to Word → Suggestions Updated
+     ↓
+Word Complete → Click Space → Word Moves to Sentence
+     ↓
+Sign Next Word → Repeat
+     ↓
+Sentence Complete → Click Speak → Hear Output → Click Save → Done!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ SUCCESS INDICATORS
+═══════════════════════════════════════════════════════════════════════════════
+
+Terminal 1 Shows:
+   ✅ SignLanguagePredictor initialized
+   ✅ Model loaded successfully
+   ✅ Server running at http://localhost:8000
+
+Website Shows:
+   ✅ "API Connected" in GREEN (top right)
+   ✅ Live camera video
+   ✅ Confidence bar
+
+When You Sign:
+   ✅ Letter appears (A-Z)
+   ✅ Confidence score updates
+   ✅ Word builds automatically
+   ✅ Suggestions appear
+
+
+═══════════════════════════════════════════════════════════════════════════════
+📞 QUICK HELP
+═══════════════════════════════════════════════════════════════════════════════
+
+Check backend is working:
+   http://localhost:8000/docs
+   (Should show interactive API documentation)
+
+Check API is connected:
+   Top right of website should show "✅ API Connected" in GREEN
+
+Check camera is working:
+   System settings → Privacy → Camera → Allow browser access
+
+Check model file:
+   Your project folder → model folder → sign_language_model.p should exist
+
+Check terminal output:
+   Look for red errors or "failed" messages
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🚀 YOU'RE READY!
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Download files ✅
+2. Install requirements ✅
+3. Run backend (Terminal 1) ✅
+4. Run frontend (Terminal 2) ✅
+5. Open website ✅
+6. Start camera ✅
+7. Start signing ✅
+
+THAT'S IT! SIGNCARE AI IS WORKING! 🤟
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignCare AI - Real-Time Sign Language Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #06b6d4;
+            --secondary: #0e7490;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #8b5cf6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Devanagari', 'Noto Sans Gujarati', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #06b6d4 0%, #06b6d4 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Modern Language Selector */
+        .lang-selector-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.35rem 0.5rem 0.35rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .lang-selector-wrapper:hover,
+        .lang-selector-wrapper:focus-within {
+            border-color: var(--primary);
+            background: rgba(30, 41, 59, 1);
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .lang-globe-icon {
+            position: absolute;
+            left: 0.6rem;
+            pointer-events: none;
+            font-size: 1rem;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .lang-select {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            padding: 0.2rem 1.4rem 0.2rem 0.2rem;
+            font-family: inherit;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2306b6d4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0 center;
+            background-size: 0.75rem;
+        }
+
+        .lang-select option {
+            background: #0f172a;
+            color: #f1f5f9;
+            padding: 0.5rem;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+
+        button:hover {
+            background: rgba(51, 65, 85, 0.5);
+        }
+
+        @media (max-width: 640px) {
+            .nav-content {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+            .nav-left {
+                justify-content: center;
+            }
+            .nav-right {
+                justify-content: space-between;
+                width: 100%;
+            }
+            .lang-selector-wrapper {
+                flex: 1;
+            }
+            .lang-select {
+                width: 100%;
+            }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card */
+        .card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .card-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+
+        /* Camera Section */
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 1rem;
+            overflow: hidden;
+            aspect-ratio: 16 / 9;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+
+        .video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .video-placeholder svg {
+            width: 60px;
+            height: 60px;
+            opacity: 0.5;
+        }
+
+        .confidence-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            display: none;
+        }
+
+        .confidence-indicator.active {
+            display: block;
+        }
+
+        .confidence-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-bar {
+            width: 100px;
+            height: 8px;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #06b6d4, #0284c7);
+            transition: width 0.3s;
+        }
+
+        .confidence-value {
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+
+        /* Input Fields */
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            background: rgba(71, 85, 105, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(71, 85, 105, 0.5);
+        }
+
+        .word-input {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        textarea {
+            resize: none;
+            min-height: 120px;
+        }
+
+        /* Label */
+        .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Suggestions Grid */
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .suggestion-btn {
+            background: rgba(71, 85, 105, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            color: var(--text-primary);
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(71, 85, 105, 0.7);
+            border-color: var(--primary);
+        }
+
+        /* Action Buttons */
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #06b6d4, #0284c7);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(71, 85, 105, 0.5);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(71, 85, 105, 0.7);
+        }
+
+        .btn-danger {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(220, 38, 38, 0.5);
+            color: #fca5a5;
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Sidebar */
+        .sidebar-section {
+            margin-bottom: 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .close-btn {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* History List */
+        .history-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            transition: all 0.3s;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item:hover {
+            background: rgba(71, 85, 105, 0.2);
+        }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .history-language {
+            display: inline-block;
+            font-size: 0.75rem;
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-left: auto;
+        }
+
+        .history-asl {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-translation {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            margin-top: 4rem;
+            padding: 2rem 1rem;
+        }
+
+        .footer-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-item h4 {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-item p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Alphabet Grid */
+        .alphabet-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.75rem;
+        }
+
+        .letter-card {
+            background: rgba(71, 85, 105, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .letter-card:hover {
+            background: rgba(71, 85, 105, 0.5);
+            border-color: var(--primary);
+        }
+
+        .letter-emoji {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .letter-text {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.875rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .translation-result {
+            margin-top: 0.75rem;
+            background: rgba(71, 85, 105, 0.3);
+            border-left: 3px solid var(--primary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .translation-result .label {
+            margin-bottom: 0.5rem;
+        }
+
+        .translation-result p {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+
+
+                /* =========================================
+        HAND LANDMARK CANVAS
+        ========================================= */
+
+        #landmarkCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+
+            pointer-events: none;
+
+            z-index: 10;
+        }
+
+        /* =========================================
+        LARGE DETECTED LETTER
+        ========================================= */
+
+        .detected-letter {
+            font-size: 5rem !important;
+            font-weight: 800;
+            line-height: 1;
+            text-align: center;
+
+            margin: 10px 0;
+
+            letter-spacing: 2px;
+        }
+
+        /* Label above the detected letter */
+
+        .detected-letter-label {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.75;
+        }
+
+        /* Hand detection status */
+
+        .hand-status {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* =========================================
+        AI RESULT CARD
+        ========================================= */
+
+        .ai-result-card {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .detected-letter {
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+        }
+
+        .hand-status {
+            color: var(--text-secondary);
+        }
+
+        .landmark-count {
+            margin-top: 0.4rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .no-suggestions {
+            grid-column: 1 / -1;
+            padding: 0.75rem;
+            text-align: center;
+            color: var(--text-secondary);
+            border: 1px dashed var(--border-color);
+            border-radius: 0.5rem;
+        }
+
+        /* Responsive */
+
+        @media (max-width: 768px) {
+
+            .detected-letter {
+                font-size: 4rem !important;
+            }
+        }
+
+        
+        /* ASL Alphabet Poster */
+        .asl-reference-image {
+            width: 100%;
+            max-height: 65vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .asl-alphabet-poster {
+            display: block;
+            width: 100%;
+            max-width: 750px;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        /* Make the ASL poster responsive on mobile */
+        @media (max-width: 600px) {
+            .asl-reference-image {
+                max-height: 60vh;
+                padding: 5px;
+            }
+
+            .asl-alphabet-poster {
+                width: 100%;
+            }
+        }
+
+        /* ASL Alphabet Poster */
+        .asl-reference-image {
+            width: 100%;
+            max-height: 65vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .asl-alphabet-poster {
+            display: block;
+            width: 100%;
+            max-width: 750px;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        /* Make the ASL poster responsive on mobile */
+        @media (max-width: 600px) {
+            .asl-reference-image {
+                max-height: 60vh;
+                padding: 5px;
+            }
+
+            .asl-alphabet-poster {
+                width: 100%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-content">
+            <div class="nav-left">
+                <div class="logo">🤟</div>
+                <div class="logo-text">
+                    <h1 data-i18n="appTitle">SignCare AI</h1>
+                    <p data-i18n="appSubtitle">Real-time Sign Language Translator</p>
+                </div>
+            </div>
+            <div class="nav-right">
+                <!-- Modern UI Language Selector -->
+                <div class="lang-selector-wrapper" title="Select Website Language">
+                    <span class="lang-globe-icon" aria-hidden="true">🌐</span>
+                    <label for="uiLanguageSelect" class="sr-only" data-i18n="selectLanguage">Select UI Language</label>
+                    <select id="uiLanguageSelect" class="lang-select" aria-label="Select UI Language">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="gu">ગુજરાતી (Gujarati)</option>
+                    </select>
+                </div>
+                <div class="nav-buttons">
+                    <button id="guideBtn" title="ASL Guide" data-i18n-title="aslGuideTitle" data-i18n-aria="aslGuideTitle" aria-label="ASL Alphabet Guide">📚</button>
+                    <button id="historyBtn" title="History" data-i18n-title="historyTitle" data-i18n-aria="historyTitle" aria-label="Translation History">
+                        📖
+                        <span id="historyBadge" style="display: none; position: absolute; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; top: 0.5rem; right: 0.5rem;"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="grid">
+            <!-- Left: Camera & Word Building -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>⚡</span>
+                            <span data-i18n="handDetectionTitle">Hand Detection</span>
+                        </div>
+                        <button id="cameraBtn" class="btn btn-primary" style="margin: 0; padding: 0.5rem 1rem; width: auto;" data-i18n="startCamera">
+                            ▶ Start Camera
+                        </button>
+                    </div>
+
+                    <!-- Video Feed -->
+                    <div class="video-container">
+                        <video id="video" autoplay playsinline muted style="display: none; width: 100%; height: 100%; object-fit: fill;"></video>
+                        <canvas id="landmarkCanvas" aria-hidden="true"></canvas>
+                        <div id="videoPlaceholder" class="video-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                <circle cx="12" cy="13" r="4"></circle>
+                            </svg>
+                            <p data-i18n="videoPlaceholderText">Click "Start Camera" to begin</p>
+                        </div>
+                        <div id="confidenceIndicator" class="confidence-indicator">
+                            <div class="confidence-label" data-i18n="confidenceLabel">Confidence</div>
+                            <div class="confidence-bar">
+                                <div id="confidenceFill" class="confidence-fill" style="width: 0%;"></div>
+                            </div>
+                            <div id="confidenceValue" class="confidence-value">0%</div>
+                        </div>
+                        <div id="cameraStatus" style="position: absolute; bottom: 1rem; left: 1rem; font-size: 0.75rem; background: rgba(0,0,0,0.6); padding: 0.5rem; border-radius: 0.25rem; display: none;">
+                            <span id="statusText" data-i18n="cameraStarting">Camera Starting...</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Detection Result -->
+                    <div class="ai-result-card">
+                        <div class="detected-letter-label" data-i18n="detectedLetterLabel">Detected Letter</div>
+                        <div id="detectedLetter" class="detected-letter">—</div>
+                        <div id="handStatus" class="hand-status" data-i18n="waitingForCamera">Waiting for camera...</div>
+                        <div id="landmarkCount" class="landmark-count" data-i18n="landmarksInitial">21 landmarks will appear when a valid hand is detected</div>
+                    </div>
+
+                    <!-- Current Word Input -->
+                    <div class="mb-4">
+                        <label class="label" data-i18n="currentWordLabel">Current Word</label>
+                        <input type="text" id="currentWord" class="word-input" placeholder="Type or sign a word..." maxlength="20" data-i18n-placeholder="currentWordPlaceholder">
+                    </div>
+
+                    <!-- Suggestions -->
+                    <div class="mb-4">
+                        <label class="label" data-i18n="suggestionsLabel">Word Suggestions</label>
+                        <div class="suggestions-grid" id="suggestionsGrid">
+                            <button class="suggestion-btn" type="button">HELLO</button>
+                            <button class="suggestion-btn" type="button">HELP</button>
+                            <button class="suggestion-btn" type="button">HOPE</button>
+                        </div>
+                    </div>
+
+                    <!-- Word Controls -->
+                    <div class="button-grid">
+                        <button id="addSpaceBtn" class="btn btn-primary" data-i18n="addSpace">
+                            ➜ Add Space
+                        </button>
+                        <button id="clearWordBtn" class="btn btn-secondary" data-i18n="clearWord">
+                            🗑 Clear Word
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Sentence & Actions -->
+            <div>
+                <!-- Sentence Section -->
+                <div class="card sidebar-section">
+                    <label class="label" data-i18n="currentSentenceLabel">Current Sentence</label>
+                    <textarea id="currentSentence" placeholder="Your sentence will appear here..." data-i18n-placeholder="currentSentencePlaceholder"></textarea>
+                    <button id="clearSentenceBtn" class="btn btn-danger" style="margin-top: 0.75rem;" data-i18n="clearSentence">
+                        🗑 Clear Sentence
+                    </button>
+                </div>
+
+                <!-- Actions -->
+                <div class="card sidebar-section">
+                    <div class="card-title" style="margin-bottom: 1rem;">
+                        <span data-i18n="actionsTitle">Actions</span>
+                    </div>
+
+                    <label class="label" data-i18n="targetLanguageLabel" style="margin-bottom: 0.35rem; display: block;">Target Language for Sentence Translation</label>
+                    <select id="languageSelect" class="mb-3">
+                        <option value="en">English 🇺🇸 / 🇮🇳</option>
+                        <option value="hi">Hindi (हिन्दी) 🇮🇳</option>
+                        <option value="gu">Gujarati (ગુજરાતી) 🇮🇳</option>
+                        <option value="mr">Marathi (मराठी) 🇮🇳</option>
+                        <option value="bn">Bengali (বাংলা) 🇮🇳</option>
+                        <option value="ta">Tamil (தமிழ்) 🇮🇳</option>
+                        <option value="te">Telugu (తెలుగు) 🇮🇳</option>
+                        <option value="kn">Kannada (ಕನ್ನಡ) 🇮🇳</option>
+                        <option value="ml">Malayalam (മലയാളം) 🇮🇳</option>
+                        <option value="pa">Punjabi (ਪੰਜਾਬੀ) 🇮🇳</option>
+                        <option value="ur">Urdu (اردو) 🇮🇳</option>
+                        <option value="or">Odia (ଓડ଼ିଆ) 🇮🇳</option>
+                        <option value="as">Assamese (অসমীয়া) 🇮🇳</option>
+                        <option value="sa">Sanskrit (संस्कृतम्) 🇮🇳</option>
+                        <option value="es">Spanish 🇪🇸</option>
+                        <option value="fr">French 🇫🇷</option>
+                    </select>
+
+                    <button id="translateBtn" class="btn btn-accent mb-2" data-i18n="translateBtn">
+                        🌐 Translate
+                    </button>
+
+                    <button id="speakBtn" class="btn btn-success mb-2" data-i18n="speakBtn">
+                        🔊 Speak
+                    </button>
+
+                    <div id="translationResult"></div>
+
+                    <button id="saveBtn" class="btn btn-primary" style="margin-top: 0.75rem;" data-i18n="saveHistoryBtn">
+                        💾 Save to History
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="historyModalTitle">📖 History</h3>
+                <button class="close-btn" data-i18n-aria="closeBtn" title="Close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="historyList"></div>
+            </div>
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color);">
+                <button id="clearHistoryBtn" class="btn btn-danger" data-i18n="clearHistoryBtn">
+                    Clear All History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASL Guide Modal -->
+    <div id="guideModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="guideModalTitle">📚 ASL Alphabet Guide</h3>
+                <button class="close-btn" data-i18n-aria="closeBtn" title="Close">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;" data-i18n="guideModalDesc">
+                    Below is the American Sign Language (ASL) alphabet.
+                    Use this as a reference when learning to sign.
+                </p>
+               
+                <div class="asl-reference-image">
+                    <img
+                        src="static/image/asl-alphabet.jpg" 
+                        alt="American Sign Language alphabet showing hand signs from A to Z"
+                        class="asl-alphabet-poster"
+                        data-i18n-alt="aslPosterAlt"
+                    />
+                </div>
+
+                <p style="font-size: 0.75rem; color: var(--text-secondary);
+                          margin-top: 2rem; text-align: center;" data-i18n="guideModalTip">
+                    👉 Pro Tip: Position your hands clearly in front of the
+                    camera for best results
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-item">
+                <h4 data-i18n="footerFeature1Title">⚡ Real-Time Detection</h4>
+                <p data-i18n="footerFeature1Desc">Powered by AI to recognize your hand gestures instantly</p>
+            </div>
+            <div class="footer-item">
+                <h4 data-i18n="footerFeature2Title">👥 For Everyone</h4>
+                <p data-i18n="footerFeature2Desc">Built for Deaf communities and ASL learners</p>
+            </div>
+            <div class="footer-item">
+                <h4 data-i18n="footerFeature3Title">🌐 Multi-Language Support</h4>
+                <p data-i18n="footerFeature3Desc">Translate to English, Hindi, Gujarati, and 14+ languages</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p data-i18n="footerCopyright">SignCare AI © 2024 • Making communication accessible through AI-powered sign language translation</p>
+        </div>
+    </footer>
+
+    <!-- Multilingual Translation Script -->
+    <script src="static/i18n.js"></script>
+
+    <script>
+        // State
+        let cameraActive = false;
+        let currentWord = '';
+        let currentSentence = '';
+        let history = JSON.parse(localStorage.getItem('signcare_history') || '[]');
+        let selectedLanguage = 'en';
+        let confidence = 0;
+
+        // ASL Dictionary
+        const aslDictionary = {
+            HELLO: 'Hello', HELP: 'Help', HOPE: 'Hope',
+            THANK: 'Thank you', LOVE: 'Love', GOOD: 'Good',
+            BAD: 'Bad', YES: 'Yes', NO: 'No', QUESTION: 'What?',
+            WATER: 'Water', FOOD: 'Food', SLEEP: 'Sleep',
+            PLAY: 'Play', WORK: 'Work', FRIEND: 'Friend'
+        };
+
+        // DOM Elements
+        const videoEl = document.getElementById('video');
+        const placeholderEl = document.getElementById('videoPlaceholder');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const currentWordInput = document.getElementById('currentWord');
+        const currentSentenceInput = document.getElementById('currentSentence');
+        const addSpaceBtn = document.getElementById('addSpaceBtn');
+        const clearWordBtn = document.getElementById('clearWordBtn');
+        const clearSentenceBtn = document.getElementById('clearSentenceBtn');
+        const translateBtn = document.getElementById('translateBtn');
+        const speakBtn = document.getElementById('speakBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const languageSelect = document.getElementById('languageSelect');
+        const historyBtn = document.getElementById('historyBtn');
+        const guideBtn = document.getElementById('guideBtn');
+        const historyModal = document.getElementById('historyModal');
+        const guideModal = document.getElementById('guideModal');
+        const confidenceIndicator = document.getElementById('confidenceIndicator');
+        const confidenceFill = document.getElementById('confidenceFill');
+        const confidenceValue = document.getElementById('confidenceValue');
+        const landmarkCanvas = document.getElementById('landmarkCanvas');
+        const landmarkContext = landmarkCanvas.getContext('2d');
+        const detectedLetterEl = document.getElementById('detectedLetter');
+        const handStatusEl = document.getElementById('handStatus');
+        const landmarkCountEl = document.getElementById('landmarkCount');
+        // =====================================================
+        // =====================================================
+        // BACKEND-DRIVEN MULTILINGUAL WORD SUGGESTIONS
+        // =====================================================
+
+        function getCurrentUiLanguage() {
+            if (typeof getSavedLanguage === 'function') {
+                const saved = getSavedLanguage();
+                if (saved) return saved;
+            }
+            const select = document.getElementById('uiLanguageSelect');
+            if (select && select.value) {
+                return select.value;
+            }
+            return 'en';
+        }
+
+        async function updateSuggestions() {
+            const prefix = currentWordInput.value.trim().toUpperCase();
+            const lang = getCurrentUiLanguage();
+
+            try {
+                let suggestions = [];
+
+                if (prefix) {
+                    // Search using the COMPLETE current English prefix with selected UI language.
+                    // B -> /suggestions/B?language=hi
+                    // BE -> /suggestions/BE?language=hi
+                    // BED -> /suggestions/BED?language=hi
+                    const response = await fetch(
+                        `/suggestions/${encodeURIComponent(prefix)}?language=${encodeURIComponent(lang)}`
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    suggestions = Array.isArray(data.suggestions)
+                        ? data.suggestions.slice(0, 3)
+                        : [];
+                } else {
+                    // Show default dictionary words in selected language when input is empty.
+                    const response = await fetch(`/words?language=${encodeURIComponent(lang)}`);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    suggestions = Array.isArray(data.words)
+                        ? data.words.slice(0, 3)
+                        : [];
+                }
+
+                renderSuggestions(suggestions);
+
+            } catch (error) {
+                console.error('❌ Suggestion error:', error);
+                renderSuggestions([]);
+            }
+        }
+
+        function renderSuggestions(suggestions) {
+            const grid = document.getElementById('suggestionsGrid');
+
+            if (!grid) return;
+
+            const topThree = Array.isArray(suggestions)
+                ? suggestions.slice(0, 3)
+                : [];
+
+            if (topThree.length === 0) {
+                const emptyMsg = typeof t === 'function' ? t('noSuggestions') : 'No suggestions available';
+                grid.innerHTML = `
+                    <div class="no-suggestions" data-i18n="noSuggestions">
+                        ${emptyMsg}
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = topThree.map(item => {
+                // Support both new object format {english, display} and legacy string format
+                const englishWord = (typeof item === 'object' && item !== null)
+                    ? (item.english || '')
+                    : String(item).trim().toUpperCase();
+                const displayText = (typeof item === 'object' && item !== null)
+                    ? (item.display || item.english || '')
+                    : String(item);
+
+                const titleAttr = englishWord && englishWord !== displayText ? `${displayText} (${englishWord})` : displayText;
+
+                return `
+                    <button class="suggestion-btn" type="button" data-english="${englishWord}" data-display="${displayText}" title="${titleAttr}">
+                        ${displayText}
+                    </button>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('.suggestion-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Retain English word internally for ASL alphabet recognition and prefix matching
+                    const selectedEnglish =
+                        button.getAttribute('data-english') ||
+                        button.textContent.trim().toUpperCase();
+
+                    currentWord = selectedEnglish;
+                    currentWordInput.value = selectedEnglish;
+
+                    updateSuggestions();
+                });
+            });
+        }
+
+        // Export to window for global access (e.g. from i18n.js language switch)
+        window.updateSuggestions = updateSuggestions;
+        window.renderSuggestions = renderSuggestions;
+        window.getCurrentUiLanguage = getCurrentUiLanguage;
+
+        // Camera
+    // =====================================================
+    // REAL AI CAMERA PREDICTION
+    // =====================================================
+
+    let confidenceInterval = null;
+    let predictionInProgress = false;
+
+    let stableLetter = null;
+    let stableCount = 0;
+    let lockedLetter = null;
+
+    const predictionCanvas = document.createElement('canvas');
+    const predictionContext = predictionCanvas.getContext('2d');
+
+    // -----------------------------------------------------
+    // Draw the 21 MediaPipe landmarks on the live video.
+    // Backend returns normalized x/y values from 0 to 1.
+    // -----------------------------------------------------
+
+    const HAND_CONNECTIONS = [
+        [0, 1], [1, 2], [2, 3], [3, 4],
+        [0, 5], [5, 6], [6, 7], [7, 8],
+        [0, 9], [9, 10], [10, 11], [11, 12],
+        [0, 13], [13, 14], [14, 15], [15, 16],
+        [0, 17], [17, 18], [18, 19], [19, 20],
+        [5, 9], [9, 13], [13, 17]
+    ];
+
+    function resizeLandmarkCanvas() {
+        const rect = landmarkCanvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+
+        landmarkCanvas.width = Math.max(1, Math.round(rect.width * dpr));
+        landmarkCanvas.height = Math.max(1, Math.round(rect.height * dpr));
+
+        landmarkContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function clearLandmarks() {
+        const rect = landmarkCanvas.getBoundingClientRect();
+        landmarkContext.clearRect(0, 0, rect.width, rect.height);
+    }
+
+    function drawLandmarks(landmarks) {
+        resizeLandmarkCanvas();
+        clearLandmarks();
+
+        if (!Array.isArray(landmarks) || landmarks.length !== 21) {
+            landmarkCountEl.textContent = t('landmarksInitial');
+            return;
+        }
+
+        const rect = landmarkCanvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+
+        // Skeleton
+        landmarkContext.lineWidth = 3;
+        landmarkContext.strokeStyle = 'rgba(6, 182, 212, 0.9)';
+
+        HAND_CONNECTIONS.forEach(([a, b]) => {
+            const p1 = landmarks[a];
+            const p2 = landmarks[b];
+
+            if (!p1 || !p2) return;
+
+            landmarkContext.beginPath();
+            landmarkContext.moveTo(p1.x * width, p1.y * height);
+            landmarkContext.lineTo(p2.x * width, p2.y * height);
+            landmarkContext.stroke();
+        });
+
+        // 21 numbered points
+        landmarks.forEach((point, index) => {
+            const x = point.x * width;
+            const y = point.y * height;
+
+            landmarkContext.beginPath();
+            landmarkContext.arc(x, y, 6, 0, Math.PI * 2);
+            landmarkContext.fillStyle = '#ffffff';
+            landmarkContext.fill();
+            landmarkContext.lineWidth = 2;
+            landmarkContext.strokeStyle = '#06b6d4';
+            landmarkContext.stroke();
+
+            landmarkContext.font = 'bold 11px Arial';
+            landmarkContext.fillStyle = '#ffffff';
+            landmarkContext.textAlign = 'center';
+            landmarkContext.textBaseline = 'middle';
+            landmarkContext.fillText(String(index), x, y - 11);
+        });
+
+        landmarkCountEl.textContent = t('landmarksDetected');
+    }
+
+    window.addEventListener('resize', () => {
+        resizeLandmarkCanvas();
+    });
+
+    // -----------------------------------------------------
+    // Add detected letter to current word
+    // -----------------------------------------------------
+
+    function addDetectedLetter(letter) {
+
+        if (!letter) return;
+
+        letter = letter.toUpperCase();
+
+        // Add letter to current word
+        currentWord += letter;
+
+        currentWordInput.value = currentWord;
+
+        // Update suggestions
+        updateSuggestions();
+
+        console.log('✅ Letter added:', letter);
+        console.log('📝 Current word:', currentWord);
+    }
+
+
+    // -----------------------------------------------------
+    // Send camera frame to FastAPI
+    // -----------------------------------------------------
+
+    async function predictCameraFrame() {
+
+        // Do not send another request while one is running
+        if (!cameraActive || predictionInProgress) {
+            return;
+        }
+
+        // Make sure video is ready
+        if (
+            videoEl.readyState < 2 ||
+            videoEl.videoWidth === 0 ||
+            videoEl.videoHeight === 0
+        ) {
+            return;
+        }
+
+        predictionInProgress = true;
+
+        try {
+
+            // -------------------------------------------------
+            // Resize frame for faster processing
+            // -------------------------------------------------
+
+            const targetWidth = 640;
+
+            const scale =
+                targetWidth / videoEl.videoWidth;
+
+            const targetHeight =
+                Math.round(videoEl.videoHeight * scale);
+
+            predictionCanvas.width = targetWidth;
+            predictionCanvas.height = targetHeight;
+
+            // Draw current camera frame
+            predictionContext.drawImage(
+                videoEl,
+                0,
+                0,
+                targetWidth,
+                targetHeight
+            );
+
+            // Convert frame to JPEG Base64
+            const imageBase64 =
+                predictionCanvas.toDataURL(
+                    'image/jpeg',
+                    0.75
+                );
+
+            // -------------------------------------------------
+            // Send frame to FastAPI
+            // -------------------------------------------------
+
+            const response = await fetch(
+                '/predict-base64',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: imageBase64
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Server error: ${response.status}`
+                );
+            }
+
+            const result = await response.json();
+
+            console.log('🤖 AI Response:', result);
+
+            // -------------------------------------------------
+            // Update confidence
+            // -------------------------------------------------
+
+            const aiConfidence =
+                Number(result.confidence || 0);
+
+            confidence =
+                Math.round(aiConfidence * 100);
+
+            confidenceFill.style.width =
+                confidence + '%';
+
+            confidenceValue.textContent =
+                confidence + '%';
+
+
+            // -------------------------------------------------
+            // Hand detected
+            // -------------------------------------------------
+
+            if (
+                result &&
+                result.hand_detected === true &&
+                result.letter &&
+                Array.isArray(result.visual_landmarks) &&
+                result.visual_landmarks.length === 21
+            ) {
+
+                // Draw all 21 MediaPipe points returned by the backend.
+                drawLandmarks(result.visual_landmarks);
+
+                detectedLetterEl.textContent =
+                    result.letter.toUpperCase();
+
+                handStatusEl.textContent =
+                    t('handDetected');
+
+                handStatusEl.style.color = 'var(--primary)';
+
+                const letter =
+                    result.letter.toUpperCase();
+
+                document.getElementById(
+                    'statusText'
+                ).textContent =
+                    t('cameraHandDetected', { letter: letter });
+
+                // ---------------------------------------------
+                // Stable prediction
+                // ---------------------------------------------
+
+                if (stableLetter === letter) {
+
+                    stableCount++;
+
+                } else {
+
+                    stableLetter = letter;
+                    stableCount = 1;
+                }
+
+                // ---------------------------------------------
+                // Add letter only after 3 stable predictions
+                // ---------------------------------------------
+
+                if (
+                    stableCount >= 3 &&
+                    lockedLetter !== letter &&
+                    aiConfidence >= 0.60
+                ) {
+
+                    addDetectedLetter(letter);
+
+                    // Lock until hand changes/disappears
+                    lockedLetter = letter;
+
+                    console.log(
+                        `🎯 Stable prediction: ${letter}`
+                    );
+                }
+
+            } else {
+
+                clearLandmarks();
+                detectedLetterEl.textContent = '—';
+                handStatusEl.textContent = t('noValidHand');
+                handStatusEl.style.color = 'var(--text-secondary)';
+                landmarkCountEl.textContent =
+                    t('landmarksInitial');
+
+                // -------------------------------------------------
+                // No hand detected
+                // -------------------------------------------------
+
+                document.getElementById(
+                    'statusText'
+                ).textContent =
+                    t('noValidHand');
+
+                stableLetter = null;
+                stableCount = 0;
+
+                // Unlock so user can show another sign
+                lockedLetter = null;
+            }
+
+        } catch (error) {
+
+            console.error(
+                '❌ Prediction error:',
+                error
+            );
+
+            document.getElementById(
+                'statusText'
+            ).textContent =
+                t('aiConnectionError');
+
+        } finally {
+
+            predictionInProgress = false;
+        }
+    }
+
+
+    // =====================================================
+    // CAMERA BUTTON
+    // =====================================================
+
+    cameraBtn.addEventListener(
+        'click',
+        async () => {
+
+            // =================================================
+            // START CAMERA
+            // =================================================
+
+            if (!cameraActive) {
+
+                try {
+
+                    console.log(
+                        '📷 Requesting camera access...'
+                    );
+
+                    const stream =
+                        await navigator.mediaDevices
+                            .getUserMedia({
+
+                                video: {
+                                    facingMode: 'user',
+
+                                    width: {
+                                        ideal: 1280
+                                    },
+
+                                    height: {
+                                        ideal: 720
+                                    }
+                                },
+
+                                audio: false
+                            });
+
+                    console.log(
+                        '✅ Camera stream received'
+                    );
+
+                    videoEl.srcObject = stream;
+
+                    videoEl.style.display = 'block';
+
+                    placeholderEl.style.display =
+                        'none';
+
+                    confidenceIndicator.classList
+                        .add('active');
+
+                    await videoEl.play();
+
+                    cameraBtn.textContent =
+                        t('stopCamera');
+
+                    cameraBtn.classList
+                        .remove('btn-primary');
+
+                    cameraBtn.classList
+                        .add('btn-danger');
+
+                    cameraActive = true;
+
+                    document.getElementById(
+                        'cameraStatus'
+                    ).style.display = 'block';
+
+                    document.getElementById(
+                        'statusText'
+                    ).textContent =
+                        t('cameraActive');
+
+                    // Reset prediction state
+
+                    stableLetter = null;
+                    stableCount = 0;
+                    lockedLetter = null;
+
+                    // -------------------------------------------------
+                    // Start AI prediction
+                    // -------------------------------------------------
+
+                    if (confidenceInterval) {
+                        clearInterval(
+                            confidenceInterval
+                        );
+                    }
+
+                    confidenceInterval =
+                        setInterval(
+                            predictCameraFrame,
+                            700
+                        );
+
+                    console.log(
+                        '🤖 AI prediction started'
+                    );
+
+                } catch (err) {
+
+                    console.error(
+                        '❌ Camera error:',
+                        err
+                    );
+
+                    if (
+                        err.name ===
+                        'NotAllowedError'
+                    ) {
+
+                        alert(
+                            t('cameraPermissionDenied')
+                        );
+
+                    } else if (
+                        err.name ===
+                        'NotFoundError'
+                    ) {
+
+                        alert(
+                            t('cameraNotFound')
+                        );
+
+                    } else {
+
+                        alert(
+                            t('cameraError') +
+                            err.message
+                        );
+                    }
+                }
+
+            }
+
+            // =================================================
+            // STOP CAMERA
+            // =================================================
+
+            else {
+
+                console.log(
+                    '⏹ Stopping camera...'
+                );
+
+                if (videoEl.srcObject) {
+
+                    videoEl.srcObject
+                        .getTracks()
+                        .forEach(track => {
+                            track.stop();
+                        });
+                }
+
+                videoEl.style.display =
+                    'none';
+
+                videoEl.srcObject = null;
+
+                placeholderEl.style.display =
+                    'flex';
+
+                confidenceIndicator.classList
+                    .remove('active');
+
+                document.getElementById(
+                    'cameraStatus'
+                ).style.display =
+                    'none';
+
+                cameraBtn.textContent =
+                    t('startCamera');
+
+                cameraBtn.classList
+                    .add('btn-primary');
+
+                cameraBtn.classList
+                    .remove('btn-danger');
+
+                cameraActive = false;
+
+                clearLandmarks();
+                detectedLetterEl.textContent = '—';
+                handStatusEl.textContent = t('waitingForCamera');
+                handStatusEl.style.color = 'var(--text-secondary)';
+                landmarkCountEl.textContent =
+                    t('landmarksInitial');
+
+                // Stop AI prediction
+
+                if (confidenceInterval) {
+
+                    clearInterval(
+                        confidenceInterval
+                    );
+
+                    confidenceInterval = null;
+                }
+
+                predictionInProgress = false;
+
+                stableLetter = null;
+                stableCount = 0;
+                lockedLetter = null;
+
+                confidence = 0;
+
+                confidenceFill.style.width =
+                    '0%';
+
+                confidenceValue.textContent =
+                    '0%';
+
+                console.log(
+                    '✅ Camera and AI stopped'
+                );
+            }
+        }
+    );
+
+        // Word input
+        currentWordInput.addEventListener('input', () => {
+            currentWord = currentWordInput.value.toUpperCase();
+            currentWordInput.value = currentWord;
+            updateSuggestions();
+        });
+
+        // Add space
+        addSpaceBtn.addEventListener('click', () => {
+            if (currentWord) {
+                currentSentence = currentSentence ? `${currentSentence} ${currentWord}` : currentWord;
+                currentSentenceInput.value = currentSentence;
+                currentWordInput.value = '';
+                currentWord = '';
+                updateSuggestions();
+            }
+        });
+
+        // Clear word
+        clearWordBtn.addEventListener('click', () => {
+            currentWordInput.value = '';
+            currentWord = '';
+            updateSuggestions();
+        });
+
+        // Clear sentence
+        clearSentenceBtn.addEventListener('click', () => {
+            currentSentenceInput.value = '';
+            currentSentence = '';
+            document.getElementById('translationResult').innerHTML = '';
+        });
+
+        // =====================================================
+        // Multilingual Translation System (Indian & Global Languages)
+        // =====================================================
+        const LANGUAGE_VOICES = {
+            en: 'en-IN',
+            hi: 'hi-IN',
+            gu: 'gu-IN',
+            mr: 'mr-IN',
+            bn: 'bn-IN',
+            ta: 'ta-IN',
+            te: 'te-IN',
+            kn: 'kn-IN',
+            ml: 'ml-IN',
+            pa: 'pa-IN',
+            ur: 'ur-IN',
+            or: 'or-IN',
+            as: 'as-IN',
+            sa: 'sa-IN',
+            es: 'es-ES',
+            fr: 'fr-FR'
+        };
+
+        const LANGUAGE_NAMES = {
+            en: 'English',
+            hi: 'Hindi (हिन्दी)',
+            gu: 'Gujarati (ગુજરાતી)',
+            mr: 'Marathi (मराठी)',
+            bn: 'Bengali (বাংলা)',
+            ta: 'Tamil (தமிழ்)',
+            te: 'Telugu (తెలుగు)',
+            kn: 'Kannada (ಕನ್ನಡ)',
+            ml: 'Malayalam (മലയാളം)',
+            pa: 'Punjabi (ਪੰਜਾਬੀ)',
+            ur: 'Urdu (اردو)',
+            or: 'Odia (ଓଡ଼ିଆ)',
+            as: 'Assamese (অসমীয়া)',
+            sa: 'Sanskrit (संस्कृतम्)',
+            es: 'Spanish (Español)',
+            fr: 'French (Français)'
+        };
+
+        const TRANSLATION_DICTIONARY = {
+            "HELLO": { hi: "नमस्ते", gu: "નમસ્તે", mr: "नमस्कार", bn: "নমস্কার", ta: "வணக்கம்", te: "నమస్కారం", kn: "ನಮಸ್ಕಾರ", ml: "നമസ്കാരം", pa: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ", ur: "سلام", or: "ନମସ୍କାର", as: "নমস্কাৰ", sa: "नमस्ते", es: "Hola", fr: "Bonjour" },
+            "HELP": { hi: "मदद", gu: "મદદ", mr: "मदत", bn: "সাহায্য", ta: "உதவி", te: "సహాయం", kn: "ಸಹಾಯ", ml: "സഹായം", pa: "ਮਦਦ", ur: "مدد", or: "ସାହାଯ୍ୟ", as: "সহায়", sa: "सहायता", es: "Ayuda", fr: "Aide" },
+            "THANK YOU": { hi: "धन्यवाद", gu: "આભાર", mr: "धन्यवाद", bn: "ধন্যবাদ", ta: "நன்றி", te: "ధన్యవాదాలు", kn: "ಧನ್ಯವಾದಗಳು", ml: "നന്ദി", pa: "ਧੰਨਵਾਦ", ur: "شکریہ", or: "ଧନ୍ୟବାଦ", as: "ধন্যবাদ", sa: "धन्यवादः", es: "Gracias", fr: "Merci" },
+            "THANKS": { hi: "धन्यवाद", gu: "આભાર", mr: "धन्यवाद", bn: "ধন্যবাদ", ta: "நன்றி", te: "ధన్యవాదాలు", kn: "ಧನ್ಯವಾದಗಳು", ml: "നന്ദി", pa: "ਧੰਨਵਾਦ", ur: "شکریہ", or: "ଧନ୍ୟବାଦ", as: "ধন্যবাদ", sa: "धन्यवादः", es: "Gracias", fr: "Merci" },
+            "PLEASE": { hi: "कृपया", gu: "કૃપા કરીને", mr: "कृपया", bn: "দয়া করে", ta: "தயவுசெய்து", te: "దయచేసి", kn: "ದಯವಿಟ್ಟು", ml: "ദയവായി", pa: "ਕਿਰਪਾ ਕਰਕੇ", ur: "براہ کرم", or: "ଦୟାକରି", as: "অনুগ্ৰহ কৰি", sa: "कृपया", es: "Por favor", fr: "S'il vous plaît" },
+            "YES": { hi: "हाँ", gu: "હા", mr: "हो", bn: "হ্যাঁ", ta: "ஆம்", te: "అవును", kn: "ಹೌದು", ml: "അതെ", pa: "ਹਾਂ", ur: "ہاں", or: "ହଁ", as: "হয়", sa: "आम्", es: "Sí", fr: "Oui" },
+            "NO": { hi: "नहीं", gu: "ના", mr: "नाही", bn: "না", ta: "இல்லை", te: "కాదు", kn: "ಇಲ್ಲ", ml: "ഇല്ല", pa: "ਨਹੀਂ", ur: "نہیں", or: "ନା", as: "নহয়", sa: "न", es: "No", fr: "Non" },
+            "WATER": { hi: "पानी", gu: "પાણી", mr: "पाणी", bn: "জল", ta: "தண்ணீர்", te: "నీరు", kn: "ನೀರು", ml: "വെള്ളം", pa: "ਪਾਣੀ", ur: "پانی", or: "ପାଣି", as: "পানী", sa: "जलम्", es: "Agua", fr: "Eau" },
+            "FOOD": { hi: "खाना", gu: "ખોરાક", mr: "अन्न", bn: "খাবার", ta: "உணவு", te: "ఆహారం", kn: "ಆಹಾರ", ml: "ഭക്ഷണം", pa: "ਖਾਣਾ", ur: "کھانا", or: "ଖାଦ୍ୟ", as: "খাদ্য", sa: "भोजनम्", es: "Comida", fr: "Nourriture" },
+            "DOCTOR": { hi: "डॉक्टर", gu: "ડોક્ટર", mr: "डॉक्टर", bn: "ডাক্তার", ta: "மருத்துவர்", te: "వైద్యుడు", kn: "ವೈದ್ಯರು", ml: "ഡോക്ടർ", pa: "ਡਾਕਟਰ", ur: "ڈاکٹر", or: "ଡାକ୍ତର", as: "চিকিৎসক", sa: "चिकित्सकः", es: "Médico", fr: "Médecin" },
+            "GOOD MORNING": { hi: "शुभ प्रभात", gu: "શુભ સવાર", mr: "शुभ सकाळ", bn: "সুপ্রভাত", ta: "காலை வணக்கம்", te: "శుభోదయం", kn: "ಶುಭೋದಯ", ml: "സുപ്രഭാതം", pa: "ਸ਼ੁਭ ਸਵੇਰ", ur: "صبح بخیر", or: "ଶୁଭ ସକାଳ", as: "সুপ্ৰভাত", sa: "सुप्रभातम्", es: "Buenos días", fr: "Bonjour" },
+            "GOODBYE": { hi: "अलविदा", gu: "આવજો", mr: "निरोप", bn: "বিদায়", ta: "விடைபெறுகிறேன்", te: "వీడ్కోలు", kn: "ವಿದಾಯ", ml: "വിട", pa: "ਅਲਵਿਦਾ", ur: "الوداع", or: "ବିଦାୟ", as: "বিদায়", sa: "पुनर्मिलामः", es: "Adiós", fr: "Au revoir" },
+            "LOVE": { hi: "प्यार", gu: "પ્રેમ", mr: "प्रेम", bn: "ভালোবাসা", ta: "அன்பு", te: "ప్రేమ", kn: "ಪ್ರೀತಿ", ml: "സ്നേഹം", pa: "ਪਿਆਰ", ur: "محبت", or: "ଭଲପାଇବା", as: "মৰম", sa: "प्रेम", es: "Amor", fr: "Amour" },
+            "FAMILY": { hi: "परिवार", gu: "પરિવાર", mr: "कुटुंब", bn: "পরিবার", ta: "குடும்பம்", te: "కుటుంబం", kn: "ಕುಟುಂಬ", ml: "കുടുംബം", pa: "ਪਰਿਵਾਰ", ur: "خاندان", or: "ପରିବାର", as: "পৰিয়াল", sa: "परिवारः", es: "Familia", fr: "Famille" },
+            "FRIEND": { hi: "दोस्त", gu: "મિત્ર", mr: "मित्र", bn: "বন্ধু", ta: "நண்பன்", te: "స్నేహితుడు", kn: "ಸ್ನೇಹಿತ", ml: "സുഹൃത്ത്", pa: "ਦੋਸਤ", ur: "دوست", or: "ବନ୍ଧୁ", as: "বন্ধু", sa: "मित्रम्", es: "Amigo", fr: "Ami" },
+            "FATHER": { hi: "पिता", gu: "પિતા", mr: "वडील", bn: "বাবা", ta: "அப்பா", te: "తండ్రి", kn: "ತಂದೆ", ml: "അച്ഛൻ", pa: "ਪਿਤਾ", ur: "والد", or: "ବାପା", as: "দেউতা", sa: "पिता", es: "Padre", fr: "Père" },
+            "MOTHER": { hi: "माँ", gu: "માતા", mr: "आई", bn: "মা", ta: "அம்மா", te: "తల్లి", kn: "ತಾಯಿ", ml: "അമ്മ", pa: "ਮਾਂ", ur: "ماں", or: "ମା", as: "মা", sa: "माता", es: "Madre", fr: "Mère" },
+            "EMERGENCY": { hi: "आपातकाल", gu: "કટોકટી", mr: "आणीबाणी", bn: "জরুরী", ta: "அவசரம்", te: "అత్యవసరం", kn: "ತುರ್ತು", ml: "അടിയന്തരാവസ്ഥ", pa: "ਸੰਕਟਕਾਲ", ur: "ہنگامی صورتحال", or: "ଜରୁରୀକାଳୀନ", as: "জৰুৰীকালীন", sa: "आपत्कालः", es: "Emergencia", fr: "Urgence" },
+            "HOSPITAL": { hi: "अस्पताल", gu: "હોસ્પિટલ", mr: "रुग्णालय", bn: "হাসপাতাল", ta: "மருத்துவமனை", te: "ఆసుపత్రి", kn: "ಆಸ್ಪತ್ರೆ", ml: "ആശുപത്രി", pa: "ਹਸਪਤਾਲ", ur: "ہسپتال", or: "ଡାକ୍ତରଖାନା", as: "চিকিৎসালয়", sa: "चिकित्सालयः", es: "Hospital", fr: "Hôpital" },
+            "STOP": { hi: "रुको", gu: "રોકો", mr: "थांबा", bn: "থামুন", ta: "நிறுத்து", te: "ఆగు", kn: "ನಿಲ್ಲಿಸಿ", ml: "നിർത്തുക", pa: "ਰੁਕੋ", ur: "روکیں", or: "ଅଟକନ୍ତୁ", as: "ৰওক", sa: "तिष्ठ", es: "Alto", fr: "Arrêt" },
+            "WELCOME": { hi: "स्वागत है", gu: "સ્વાગત છે", mr: "स्वागत आहे", bn: "স্বাগতম", ta: "வரவேற்கிறோம்", te: "స్వాగతం", kn: "ಸ್ವಾಗತ", ml: "സ്വാഗതം", pa: "ਸੁਆਗਤ ਹੈ", ur: "خوش آمدید", or: "ସ୍ୱାଗତ", as: "স্বাগতম", sa: "स्वागतम्", es: "Bienvenido", fr: "Bienvenue" }
+        };
+
+        async function translateTextAsync(text, targetLang) {
+            if (!text || !text.trim()) return '';
+            const cleanText = text.trim();
+            if (targetLang === 'en') return cleanText;
+
+            const upper = cleanText.toUpperCase();
+            if (TRANSLATION_DICTIONARY[upper] && TRANSLATION_DICTIONARY[upper][targetLang]) {
+                return TRANSLATION_DICTIONARY[upper][targetLang];
+            }
+
+            const words = upper.split(/\s+/);
+            const translatedWords = words.map(w => {
+                if (TRANSLATION_DICTIONARY[w] && TRANSLATION_DICTIONARY[w][targetLang]) {
+                    return TRANSLATION_DICTIONARY[w][targetLang];
+                }
+                return null;
+            });
+            const allMatched = translatedWords.every(w => w !== null);
+            if (allMatched && words.length > 0) {
+                return translatedWords.join(' ');
+            }
+
+            // Online Google Translate API
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(cleanText)}`;
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data[0] && data[0][0] && data[0][0][0]) {
+                        return data[0].map(item => item[0]).join('');
+                    }
+                }
+            } catch (err) {
+                console.warn('Online Google translation failed, trying MyMemory:', err);
+            }
+
+            // Online MyMemory API fallback
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const mmUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanText)}&langpair=en|${targetLang}`;
+                const res = await fetch(mmUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.responseData && data.responseData.translatedText) {
+                        return data.responseData.translatedText;
+                    }
+                }
+            } catch (err) {
+                console.warn('MyMemory translation failed:', err);
+            }
+
+            // Partial dictionary fallback
+            if (words.length > 1) {
+                return words.map(w => (TRANSLATION_DICTIONARY[w] && TRANSLATION_DICTIONARY[w][targetLang]) ? TRANSLATION_DICTIONARY[w][targetLang] : w).join(' ');
+            }
+
+            return cleanText;
+        }
+
+        // Translate Button Click Handler
+        translateBtn.addEventListener('click', async () => {
+            if (!currentSentence) {
+                alert(t('pleaseEnterSentence'));
+                return;
+            }
+
+            const targetLang = selectedLanguage;
+            const langName = LANGUAGE_NAMES[targetLang] || targetLang.toUpperCase();
+            
+            document.getElementById('translationResult').innerHTML = `
+                <div class="translation-result">
+                    <span class="label">${t('translatingTo', { lang: langName })}</span>
+                    <p style="opacity: 0.7;">${t('pleaseWait')}</p>
+                </div>
+            `;
+
+            try {
+                const translation = await translateTextAsync(currentSentence, targetLang);
+                document.getElementById('translationResult').innerHTML = `
+                    <div class="translation-result">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span class="label" style="margin-bottom: 0;">${t('translationHeader', { lang: langName })}</span>
+                            <button id="copyTranslationBtn" class="btn btn-secondary" style="width: auto; padding: 0.25rem 0.6rem; font-size: 0.75rem;">${t('copyBtn')}</button>
+                        </div>
+                        <p id="translatedResultContent">${translation}</p>
+                    </div>
+                `;
+
+                const copyBtn = document.getElementById('copyTranslationBtn');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', async () => {
+                        try {
+                            await navigator.clipboard.writeText(translation);
+                            copyBtn.textContent = t('copied');
+                            setTimeout(() => {
+                                copyBtn.textContent = t('copyBtn');
+                            }, 2000);
+                        } catch (e) {
+                            console.error('Clipboard copy error:', e);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+                document.getElementById('translationResult').innerHTML = `
+                    <div class="translation-result">
+                        <span class="label">${t('translationHeader', { lang: langName })}</span>
+                        <p>${currentSentence}</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Speak Button Click Handler
+        speakBtn.addEventListener('click', async () => {
+            if (!currentSentence) {
+                alert(t('pleaseEnterSentence'));
+                return;
+            }
+
+            if (!window.speechSynthesis) {
+                alert(t('speechNotSupported'));
+                return;
+            }
+
+            const translationEl = document.querySelector('.translation-result p');
+            let textToSpeak = currentSentence;
+
+            if (selectedLanguage !== 'en') {
+                if (translationEl && translationEl.textContent && !translationEl.textContent.includes('Please wait') && !translationEl.textContent.includes('પ્રતીક્ષા') && !translationEl.textContent.includes('प्रतीक्षा')) {
+                    textToSpeak = translationEl.textContent;
+                } else {
+                    textToSpeak = await translateTextAsync(currentSentence, selectedLanguage);
+                }
+            }
+
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            const targetVoiceLang = LANGUAGE_VOICES[selectedLanguage] || 'en-US';
+            utterance.lang = targetVoiceLang;
+
+            try {
+                const voices = window.speechSynthesis.getVoices();
+                let voice = voices.find(v => v.lang === targetVoiceLang || v.lang.replace('_', '-').startsWith(targetVoiceLang));
+                if (!voice) {
+                    voice = voices.find(v => v.lang.startsWith(selectedLanguage));
+                }
+                if (voice) {
+                    utterance.voice = voice;
+                }
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            } catch (err) {
+                console.warn('SpeechSynthesis error:', err);
+            }
+        });
+
+        // Save to history
+        saveBtn.addEventListener('click', () => {
+            if (!currentSentence) {
+                alert(t('pleaseEnterSentence'));
+                return;
+            }
+
+            const translationEl = document.querySelector('.translation-result p');
+            const translation = translationEl ? translationEl.textContent : currentSentence;
+
+            const entry = {
+                id: Date.now(),
+                asl: currentSentence,
+                translation: translation,
+                language: selectedLanguage,
+                timestamp: new Date().toLocaleString()
+            };
+
+            history.unshift(entry);
+            localStorage.setItem('signcare_history', JSON.stringify(history));
+            
+            currentSentenceInput.value = '';
+            currentSentence = '';
+            document.getElementById('translationResult').innerHTML = '';
+            
+            updateHistoryDisplay();
+        });
+
+        // Language change for sentence translation
+        languageSelect.addEventListener('change', (e) => {
+            selectedLanguage = e.target.value;
+        });
+
+        // Update history display
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            const badge = document.getElementById('historyBadge');
+
+            if (history.length === 0) {
+                historyList.innerHTML = `<div class="empty-state" data-i18n="noHistory">${t('noHistory')}</div>`;
+                badge.style.display = 'none';
+            } else {
+                badge.style.display = 'block';
+                historyList.innerHTML = history.map(entry => `
+                    <div class="history-item">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <div class="history-time">${entry.timestamp}</div>
+                            <div class="history-language">${entry.language.toUpperCase()}</div>
+                        </div>
+                        <div class="history-asl">${entry.asl}</div>
+                        <div class="history-translation">${entry.translation}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Clear history
+        document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+            if (confirm(t('clearHistoryConfirm'))) {
+                history = [];
+                localStorage.removeItem('signcare_history');
+                updateHistoryDisplay();
+            }
+        });
+
+        // Modals
+        historyBtn.addEventListener('click', () => {
+            historyModal.classList.add('active');
+            updateHistoryDisplay();
+        });
+
+        guideBtn.addEventListener('click', () => {
+            guideModal.classList.add('active');
+            if (typeof generateAlphabet === 'function') {
+                generateAlphabet();
+            }
+        });
+
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                historyModal.classList.remove('active');
+                guideModal.classList.remove('active');
+            });
+        });
+
+        // UI Language Selector Event Listener
+        const uiLanguageSelect = document.getElementById('uiLanguageSelect');
+        if (uiLanguageSelect) {
+            uiLanguageSelect.addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+                updateSuggestions();
+            });
+        }
+
+        // Listen for languageChanged custom event from i18n
+        window.addEventListener('signcare:languageChanged', () => {
+            updateSuggestions();
+        });
+
+        // Initialize Application & Localization
+        resizeLandmarkCanvas();
+        updateHistoryDisplay();
+        
+        // Load saved UI language preference (default English)
+        const initialSavedLang = getSavedLanguage();
+        setLanguage(initialSavedLang, false);
+        updateSuggestions();
+
+        window.addEventListener('beforeunload', () => {
+            if (confidenceInterval) {
+                clearInterval(confidenceInterval);
+            }
+
+            if (videoEl.srcObject) {
+                videoEl.srcObject.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>
