@@ -1,59 +1,61 @@
 # SignCare AI: Real-Time ASL Alphabet Translator
 
-Leveraged AI/ML Honors focus to engineer a low-latency American Sign Language (ASL) translation engine, processing live video feeds through custom-trained machine learning models to classify hand gestures in real time.
+**Built via AI-Augmented Engineering:** The computer vision pipeline, model training scripts, and backend architecture were rapidly developed and optimized using **Trae AI IDE** and **Claude**.
 
-## Tech Stack
+SignCare AI is a low-latency American Sign Language (ASL) translation engine that processes live video feeds through a custom-trained machine learning model to classify A-Z hand gestures in real time.
+
+> **📸 [Insert a GIF or clean screenshot here showing the live webcam feed with MediaPipe landmarks and the predicted letter overlay]**
+
+## ⚙️ The Inference Pipeline
+
+1. **Capture & Process:** OpenCV captures the live raw video frame.
+2. **Feature Extraction:** MediaPipe extracts 21 hand landmarks (63 3D spatial coordinates) and normalizes them, stripping background noise.
+3. **Classification:** A lightweight Random Forest model (trained via scikit-learn) classifies the coordinate data into A-Z gestures.
+4. **Delivery:** The FastAPI backend serves the translated text with near-zero latency.
+
+## 🛠️ Tech Stack
+
 * **Computer Vision:** OpenCV, MediaPipe
 * **Machine Learning:** scikit-learn (Random Forest)
-* **Backend API:** Python, FastAPI
+* **Backend API:** Python 3.11, FastAPI
+* **Frontend:** HTML, CSS, JavaScript
 
-## Architectural Impact
-* **Kinematic Feature Extraction:** Utilized Google's MediaPipe and OpenCV to capture and normalize 3D hand-landmark coordinates from raw webcam feeds, stripping away background noise for clean model inputs.
-* **Optimized Model Training:** Trained and tuned a Random Forest classifier using scikit-learn on extracted coordinate data, prioritizing high-accuracy classification while keeping the model lightweight enough for edge deployment.
-* **Real-Time API Integration:** Wrapped the inference engine in a FastAPI backend to process video frames and return translated ASL text with near-zero latency.
+## ⚡ Architectural Impact
 
-## Architecture & Project Structure
+* **Kinematic Feature Extraction:** Built a highly robust data extraction pipeline that relies entirely on 3D spatial coordinates rather than raw pixel data, ensuring the model remains lightweight and immune to lighting changes.
+* **Edge-Ready Model:** Trained and hyper-tuned a Random Forest classifier to prioritize high-accuracy classification while maintaining a small enough footprint for edge device deployment.
+* **Real-Time API Integration:** Wrapped the entire inference engine in an asynchronous FastAPI backend to process video frames and return results instantly.
 
-```text
-SignCare-AI/
-├── app.py                      # FastAPI backend and inference API entry point
-├── requirements.txt            # Python dependencies
-├── model/                      # Saved trained model artifacts
-│   ├── sign_language_model.p
-│   └── sign_language_model_combined.p
-├── src/                        # Data preparation, training, and evaluation scripts
-│   ├── clean_data.py
-│   ├── collect_data.py
-│   ├── motion_recognition.py
-│   └── train_model.py
-├── Data/                       # Hand landmark coordinate datasets
-│   └── alphabet_data.csv
-├── templates/                  # Frontend HTML interfaces
-├── static/                     # Frontend CSS and JS assets
-├── tests/                      # Automated test suite
-└── docs/                       # Setup guides, results, and project notes
-```
+---
 
-## Local Setup & Installation
+## 🚀 Local Setup & Installation
 
-The project dependencies are pinned in `requirements.txt`. Python 3.11+ is recommended.
+**Prerequisites:** Python 3.11+ is recommended. Ensure you have a working webcam connected.
 
-### 1. Clone the repository
+### 1. Clone the Repository
+
 ```powershell
-git clone [https://github.com/AK-4756/SignCare-AI.git](https://github.com/AK-4756/SignCare-AI.git)
-Set-Location SignCare-AI
+git clone https://github.com/AK-4756/SignCare-AI.git
+cd SignCare-AI
+
 ```
 
-### 2. Configure and install dependencies
+### 2. Configure Virtual Environment & Dependencies
+
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+
 ```
 
 ### 3. Run the Inference API
+
 ```powershell
 python app.py
+
 ```
-*Once the API is running, open http://localhost:8000/docs to view the interactive API documentation.*
+
+*Interactive API documentation will be available at: http://localhost:8000/docs*
+
