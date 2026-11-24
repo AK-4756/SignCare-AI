@@ -4,7 +4,10 @@
 
 SignCare AI is a low-latency American Sign Language (ASL) translation engine that processes live video feeds through a custom-trained machine learning model to classify A-Z hand gestures in real time.
 
-> **📸 [Insert a GIF or clean screenshot here showing the live webcam feed with MediaPipe landmarks and the predicted letter overlay]**
+!Screenshot (521).png.png)
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/88481bb0-0b77-4842-b5fe-48d7aac1383f" />
+
 
 ## ⚙️ The Inference Pipeline
 
